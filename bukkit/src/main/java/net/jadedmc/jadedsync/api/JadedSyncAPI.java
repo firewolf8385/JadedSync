@@ -25,6 +25,7 @@
 package net.jadedmc.jadedsync.api;
 
 import net.jadedmc.jadedsync.JadedSyncBukkitPlugin;
+import net.jadedmc.jadedsync.api.integration.Integration;
 import net.jadedmc.jadedsync.api.player.JadedPlayer;
 import org.bson.Document;
 import org.bukkit.entity.Player;
@@ -59,6 +60,14 @@ public class JadedSyncAPI {
      */
     public static boolean hasPlayer(@NotNull final UUID uuid) {
         return plugin.getRedis().exists("jadedsync:players:" + uuid.toString());
+    }
+
+    /**
+     * Registers an Integration to be cached.
+     * @param integration Integration to register.
+     */
+    public void registerIntegration(@NotNull final Integration integration) {
+        plugin.getIntegrationManager().registerIntegration(integration);
     }
 
     /**
