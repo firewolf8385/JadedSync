@@ -27,6 +27,7 @@ package net.jadedmc.jadedsync.api;
 import net.jadedmc.jadedsync.JadedSyncBukkitPlugin;
 import net.jadedmc.jadedsync.api.integration.Integration;
 import net.jadedmc.jadedsync.api.player.JadedPlayer;
+import net.jadedmc.jadedsync.database.Redis;
 import org.bson.Document;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -81,5 +82,9 @@ public class JadedSyncAPI {
 
         // Sends that document to Redis.
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> plugin.getRedis().set("jadedsync:players:" + jadedPlayer.getUniqueId(), jadedPlayer.getDocument().toJson()));
+    }
+
+    public Redis getRedis() {
+        return plugin.getRedis();
     }
 }
