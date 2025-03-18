@@ -109,4 +109,8 @@ public class JadedSyncAPI {
 
         return syncPlayers;
     }
+
+    public static Integration getIntegration(@NotNull final String id) {
+        return plugin.getIntegrationManager().getIntegration(id);
+    }
 }
