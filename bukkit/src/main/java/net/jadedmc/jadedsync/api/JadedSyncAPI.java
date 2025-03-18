@@ -66,7 +66,7 @@ public class JadedSyncAPI {
      * Registers an Integration to be cached.
      * @param integration Integration to register.
      */
-    public void registerIntegration(@NotNull final Integration integration) {
+    public static void registerIntegration(@NotNull final Integration integration) {
         plugin.getIntegrationManager().registerIntegration(integration);
     }
 
