@@ -83,7 +83,6 @@ public class JadedSyncAPI {
     public static void updatePlayer(@NotNull final Player player) {
         // Update the player's bSon document. Loops through all loaded integrations as well.
         final SyncPlayer syncPlayer = new SyncPlayer(plugin, player);
-        syncPlayer.updateDocument();
 
         // Sends that document to Redis.
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> plugin.getRedis().set("jadedsync:players:" + syncPlayer.getUniqueId(), syncPlayer.getDocument().toJson()));
