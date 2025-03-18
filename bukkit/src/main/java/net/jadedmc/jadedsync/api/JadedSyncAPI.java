@@ -26,12 +26,17 @@ package net.jadedmc.jadedsync.api;
 
 import net.jadedmc.jadedsync.JadedSyncBukkitPlugin;
 import net.jadedmc.jadedsync.api.integration.Integration;
-import net.jadedmc.jadedsync.api.player.JadedPlayer;
+import net.jadedmc.jadedsync.api.player.SyncPlayer;
+import net.jadedmc.jadedsync.api.player.SyncPlayerMap;
 import net.jadedmc.jadedsync.database.Redis;
 import org.bson.Document;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import redis.clients.jedis.Jedis;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -42,11 +47,11 @@ public class JadedSyncAPI {
         plugin = pl;
     }
 
-    public static CompletableFuture<JadedPlayer> getJadedPlayer(@NotNull final Player player) {
+    public static CompletableFuture<SyncPlayer> getJadedPlayer(@NotNull final Player player) {
         return CompletableFuture.supplyAsync(() -> {
             if(hasPlayer(player.getUniqueId())) {
                 final Document document = Document.parse(plugin.getRedis().get("jadedsync:players:" + player.getUniqueId()));
-                return new JadedPlayer(plugin, document);
+                return new SyncPlayer(plugin, document);
             }
             else {
                 return null;
@@ -77,14 +82,31 @@ public class JadedSyncAPI {
      */
     public static void updatePlayer(@NotNull final Player player) {
         // Update the player's bSon document. Loops through all loaded integrations as well.
-        final JadedPlayer jadedPlayer = new JadedPlayer(plugin, player);
-        jadedPlayer.updateDocument();
+        final SyncPlayer syncPlayer = new SyncPlayer(plugin, player);
+        syncPlayer.updateDocument();
 
         // Sends that document to Redis.
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> plugin.getRedis().set("jadedsync:players:" + jadedPlayer.getUniqueId(), jadedPlayer.getDocument().toJson()));
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> plugin.getRedis().set("jadedsync:players:" + syncPlayer.getUniqueId(), syncPlayer.getDocument().toJson()));
     }
 
     public static Redis getRedis() {
         return plugin.getRedis();
+    }
+
+    public static SyncPlayerMap getSyncPlayers() {
+        final SyncPlayerMap syncPlayers = new SyncPlayerMap();
+
+        try(Jedis jedis = plugin.getRedis().jedisPool().getResource()) {
+            final Set<String> keys = jedis.keys("jadedsync:players:*");
+
+            for(@NotNull final String key : keys) {
+                final String json = jedis.get(key);
+                final Document document = Document.parse(json);
+                final SyncPlayer syncPlayer = new SyncPlayer(plugin, document);
+                syncPlayers.put(syncPlayer.getUniqueId(), syncPlayer);
+            }
+        }
+
+        return syncPlayers;
     }
 }

@@ -32,27 +32,45 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class JadedPlayer {
+/**
+ * Represents a player being synced across the network.
+ * Data is stored in Redis
+ */
+public class SyncPlayer {
     private final JadedSyncBukkitPlugin plugin;
     private final UUID uuid;
     private final String displayName;
     private Document document;
     private boolean updated = false;
 
-    public JadedPlayer(@NotNull final JadedSyncBukkitPlugin plugin, @NotNull final Document document) {
+    /**
+     * Creates a SyncPlayer from a bSon document.
+     * @param plugin Instance of the plugin.
+     * @param document bSon document representing the player.
+     */
+    public SyncPlayer(@NotNull final JadedSyncBukkitPlugin plugin, @NotNull final Document document) {
         this.plugin = plugin;
         this.uuid = UUID.fromString(document.getString("uuid"));
-        this.displayName = document.getString("displayName");
+        this.displayName = document.getString("username");
         this.document = document;
     }
 
-    public JadedPlayer(@NotNull final JadedSyncBukkitPlugin plugin, @NotNull final Player player) {
+    /**
+     * Creates a SyncPlayer from an online player.
+     * @param plugin Instance of the plugin.
+     * @param player Player to get the SyncPlayer of.
+     */
+    public SyncPlayer(@NotNull final JadedSyncBukkitPlugin plugin, @NotNull final Player player) {
         this.plugin = plugin;
         this.uuid = player.getUniqueId();
         this.displayName = player.getName();
         this.document = updateDocument();
     }
 
+    /**
+     * Converts the player into its bSon document form.
+     * @return Serialized form of the SyncPlayer.
+     */
     public Document getDocument() {
         return this.document;
     }
@@ -63,6 +81,10 @@ public class JadedPlayer {
 
     public UUID getUniqueId() {
         return this.uuid;
+    }
+
+    public String getName() {
+        return this.displayName;
     }
 
     public Document updateDocument() {
@@ -76,7 +98,7 @@ public class JadedPlayer {
         updated = false;
         final Document document = new Document();
         document.append("uuid", this.uuid.toString());
-        document.append("displayName", this.displayName);
+        document.append("username", this.displayName);
 
         final Document integrationsDocument = new Document();
 
