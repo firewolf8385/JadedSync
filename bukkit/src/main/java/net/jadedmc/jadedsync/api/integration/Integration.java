@@ -24,6 +24,7 @@
  */
 package net.jadedmc.jadedsync.api.integration;
 
+import net.jadedmc.jadedsync.api.JadedSyncAPI;
 import org.bson.Document;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -47,5 +48,9 @@ public abstract class Integration {
 
     public void onRedisMessage(@NotNull final String message) {
 
+    }
+
+    public void publish(@NotNull final String message) {
+        JadedSyncAPI.getRedis().publish("jadedsync", "integration " + id + " " + message);
     }
 }
