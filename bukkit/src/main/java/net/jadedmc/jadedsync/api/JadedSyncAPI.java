@@ -84,7 +84,7 @@ public class JadedSyncAPI {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> plugin.getRedis().set("jadedsync:players:" + jadedPlayer.getUniqueId(), jadedPlayer.getDocument().toJson()));
     }
 
-    public Redis getRedis() {
+    public static Redis getRedis() {
         return plugin.getRedis();
     }
 }
