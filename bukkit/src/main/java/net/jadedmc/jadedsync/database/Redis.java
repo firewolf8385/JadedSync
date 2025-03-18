@@ -25,6 +25,7 @@
 package net.jadedmc.jadedsync.database;
 
 import net.jadedmc.jadedsync.JadedSyncBukkitPlugin;
+import net.jadedmc.jadedsync.api.integration.Integration;
 import org.jetbrains.annotations.NotNull;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -107,6 +108,21 @@ public class Redis {
                     jedis.subscribe(new JedisPubSub() {
                         @Override
                         public void onMessage(String channel, String msg) {
+                            String[] args = msg.split(" ", 3);
+
+                            if(args.length < 3) {
+                                return;
+                            }
+
+                            String integrationID = args[1];
+
+                            Integration integration = plugin.getIntegrationManager().getIntegration(integrationID);
+
+                            if(integration == null) {
+                                return;
+                            }
+
+                            integration.onRedisMessage(args[2]);
                         }
                     }, "jadedsync");
                 }
