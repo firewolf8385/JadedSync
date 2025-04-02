@@ -52,7 +52,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <finalName>JadedSync</finalName>
+                    <!--<finalName>JadedSync</finalName> -->
                     <relocations>
                         <relocation>
                             <pattern>org.bson</pattern>
