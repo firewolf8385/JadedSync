@@ -55,8 +55,12 @@
                     <finalName>JadedSync</finalName>
                     <relocations>
                         <relocation>
-                            <pattern>org.mongodb.bson</pattern>
-                            <shadedPattern>net.jadedmc.jadedsync.shaded.bson</shadedPattern>
+                            <pattern>org.bson</pattern>
+                            <shadedPattern>net.jadedmc.jadedsync.libraries.bson</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>dev.dejvokep.boostedyaml</pattern>
+                            <shadedPattern>net.jadedmc.jadedsync.libraries.boostedyaml</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
