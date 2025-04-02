@@ -55,7 +55,7 @@
                     <finalName>JadedSync</finalName>
                     <relocations>
                         <relocation>
-                            <pattern>org.bson</pattern>
+                            <pattern>org.mongodb.bson</pattern>
                             <shadedPattern>net.jadedmc.jadedsync.shaded.bson</shadedPattern>
                         </relocation>
                     </relocations>
