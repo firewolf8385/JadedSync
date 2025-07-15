@@ -34,19 +34,33 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import redis.clients.jedis.Jedis;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * API Methods for the plugin.
+ * Designed for external use.
+ */
 public class JadedSyncAPI {
     private static JadedSyncBukkitPlugin plugin;
 
+    /**
+     * Initializes the API.
+     * @param pl Instance of the PlayerPasswords plugin.
+     */
     public static void initialize(@NotNull final JadedSyncBukkitPlugin pl) {
         plugin = pl;
     }
 
+    /**
+     * Not entirely sure why this exists, ngl.
+     * <p><b>Deprecated: I'm sure there's a better way to do this.</b></p>
+     * @param player Player to get the SyncPlayer of.
+     * @return SyncPlayer.
+     */
+    // TODO: Delete this
+    @Deprecated
     public static CompletableFuture<SyncPlayer> getJadedPlayer(@NotNull final Player player) {
         return CompletableFuture.supplyAsync(() -> {
             if(hasPlayer(player.getUniqueId())) {
@@ -59,8 +73,34 @@ public class JadedSyncAPI {
         });
     }
 
+    public static Integration getIntegration(@NotNull final String id) {
+        return plugin.getIntegrationManager().getIntegration(id);
+    }
+
+    /**
+     * <p>Gets all players cached in Redis, as a {@link net.jadedmc.jadedsync.api.player.SyncPlayerMap SyncPlayerMap}.</p>
+     * <p><b>Warning: This is done on the thread this is called from. Should be used asynchronously.</b></p>
+     * @return Map of all cached players.
+     */
+    public static SyncPlayerMap getSyncPlayers() {
+        final SyncPlayerMap syncPlayers = new SyncPlayerMap();
+
+        try(Jedis jedis = plugin.getRedis().jedisPool().getResource()) {
+            final Set<String> keys = jedis.keys("jadedsync:players:*");
+
+            for(@NotNull final String key : keys) {
+                final String json = jedis.get(key);
+                final Document document = Document.parse(json);
+                final SyncPlayer syncPlayer = new SyncPlayer(plugin, document);
+                syncPlayers.put(syncPlayer.getUniqueId(), syncPlayer);
+            }
+        }
+        return syncPlayers;
+    }
+
     /**
      * Check if a given player is already cached in Redis.
+     * <p><b>Warning: This is done on the thread this is called from. Should be used asynchronously.</b></p>
      * @param uuid UUID of the player to check.
      * @return true if they are in Redis, false if they are not.
      */
@@ -90,26 +130,5 @@ public class JadedSyncAPI {
 
     public static Redis getRedis() {
         return plugin.getRedis();
-    }
-
-    public static SyncPlayerMap getSyncPlayers() {
-        final SyncPlayerMap syncPlayers = new SyncPlayerMap();
-
-        try(Jedis jedis = plugin.getRedis().jedisPool().getResource()) {
-            final Set<String> keys = jedis.keys("jadedsync:players:*");
-
-            for(@NotNull final String key : keys) {
-                final String json = jedis.get(key);
-                final Document document = Document.parse(json);
-                final SyncPlayer syncPlayer = new SyncPlayer(plugin, document);
-                syncPlayers.put(syncPlayer.getUniqueId(), syncPlayer);
-            }
-        }
-
-        return syncPlayers;
-    }
-
-    public static Integration getIntegration(@NotNull final String id) {
-        return plugin.getIntegrationManager().getIntegration(id);
     }
 }
